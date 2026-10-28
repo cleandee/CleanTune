@@ -1,0 +1,7 @@
+# CleanTune - Warzone / BO7 - V1 post-HeSuVi
+# Stereo chain after virtual surround. HRIRs can dull the top end and bloat the bass,
+# so this puts back a little clarity.
+
+Channel: all
+Filter: ON PK Fc 4500 Hz Gain 1 dB Q 0.8
+Filter: ON PK Fc 180 Hz Gain -1 dB Q 0.9

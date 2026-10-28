@@ -1,0 +1,6 @@
+# Windows
+Thumbs.db
+desktop.ini
+# Backups the installer makes
+*.backup-*
+config.backup-*.txt

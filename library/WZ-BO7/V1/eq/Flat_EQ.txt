@@ -1,0 +1,8 @@
+# CleanTune - Flat EQ fallback
+# Gentle version of the V1 target with no headphone-specific correction.
+# A squig.link Auto EQ for your exact headset is far more accurate.
+# Save your own file in this folder and point the EQ line in config.txt at it.
+
+Preamp: -2 dB
+Filter: ON LSC Fc 105 Hz Gain 2 dB Q 0.7
+Filter: ON PK Fc 3000 Hz Gain 1 dB Q 1.0
