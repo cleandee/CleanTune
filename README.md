@@ -31,6 +31,16 @@ If that line fails with a TLS or connection error, run this version instead:
 [Net.ServicePointManager]::SecurityProtocol = 'Tls12'; irm https://raw.githubusercontent.com/cleandee/CleanTune/main/Install-CleanTune.ps1 | iex
 ```
 
+## Uninstall
+
+To remove everything CleanTune installed, including VB-CABLE, Equalizer APO, HeSuVi and ReaPlugs, open **Windows PowerShell as Administrator** and run:
+
+```
+irm https://raw.githubusercontent.com/cleandee/CleanTune/main/Uninstall-CleanTune.ps1 | iex
+```
+
+It lists what it will remove and asks you to type Y before it starts. Restart your PC afterwards to finish removing the audio drivers.
+
 ### Run it from a downloaded copy
 
 1. Download the repo as a zip from GitHub and extract it
@@ -45,7 +55,7 @@ The downloaded copy uses the library next to the script. The one-line install al
 | --- | --- |
 | 1 Install | Installs VB-CABLE and sets it to 7.1 surround, installs Equalizer APO, HeSuVi and ReaPlugs, copies the library, writes config.txt |
 | 2 Refresh tune library | Copies the library again, backing up the old one first |
-| 3 Remove CleanTune | Restores your original config.txt and deletes the CleanTune folder |
+| 3 Remove CleanTune | Restores your original config.txt and deletes the CleanTune folder but keeps the audio tools. Use the uninstall command below to remove everything |
 
 Every time config.txt is rewritten the old one is backed up as `config.backup-date.txt` in the Equalizer APO config folder.
 
