@@ -17,17 +17,27 @@ Game  ->  CABLE Input  ->  Equalizer APO chain  ->  CABLE Output  ->  Listen  ->
 
 ## Install
 
-1. Extract the zip somewhere like your Desktop. Keep `Install-CleanTune.ps1` and the `library` folder together
-2. Right-click the Start button, open **Windows PowerShell as Administrator**
-3. Run this, changing the path to where you extracted it:
+Right-click the Start button, open **Windows PowerShell as Administrator**, then paste this and press Enter:
 
 ```
-cd "$env:USERPROFILE\Desktop\CleanTune"
-powershell -ExecutionPolicy Bypass -File .\Install-CleanTune.ps1
+irm https://raw.githubusercontent.com/cleandee/CleanTune/main/Install-CleanTune.ps1 | iex
 ```
 
-4. Choose `1` and follow the prompts
-5. Do the manual steps it shows at the end, then read `library\WZ-BO7_SETTINGS.md`
+Choose `1` and follow the prompts. When it finishes, do the manual steps it shows, then read `library\WZ-BO7_SETTINGS.md`.
+
+If that line fails with a TLS or connection error, run this version instead:
+
+```
+[Net.ServicePointManager]::SecurityProtocol = 'Tls12'; irm https://raw.githubusercontent.com/cleandee/CleanTune/main/Install-CleanTune.ps1 | iex
+```
+
+### Run it from a downloaded copy
+
+1. Download the repo as a zip from GitHub and extract it
+2. Open **Windows PowerShell as Administrator** in that folder
+3. Run `powershell -ExecutionPolicy Bypass -File .\Install-CleanTune.ps1`
+
+The downloaded copy uses the library next to the script. The one-line install always pulls the latest library from GitHub.
 
 ## Menu
 

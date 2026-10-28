@@ -1,13 +1,19 @@
-#Requires -Version 5.1
 <#
     CleanTune guided installer
     Game audio tuning stack for Call of Duty Warzone / Black Ops 7.
 
     Chain:  Game -> CABLE Input (Equalizer APO + HeSuVi) -> CABLE Output -> "Listen" -> headphones
 
-    Run from an elevated Windows PowerShell 5.1 window:
+    One-line install from an elevated Windows PowerShell 5.1 window:
+        irm https://raw.githubusercontent.com/cleandee/CleanTune/main/Install-CleanTune.ps1 | iex
+
+    Or run it from a downloaded copy of the repo:
         powershell -ExecutionPolicy Bypass -File .\Install-CleanTune.ps1
 #>
+
+# Everything runs inside this block so that running through irm | iex
+# does not leave settings or variables behind in your PowerShell window.
+& {
 
 $ErrorActionPreference = 'Stop'
 $ProgressPreference    = 'SilentlyContinue'   # makes Invoke-WebRequest far faster on PS 5.1
@@ -53,7 +59,8 @@ $ProjectDir  = Join-Path $EapoConfig $ProjectName
 $LibraryDest = Join-Path $ProjectDir 'library'
 $BoostFile   = Join-Path $ProjectDir 'boost.txt'
 $TempDir     = Join-Path $env:TEMP "$ProjectName-setup"
-$LibrarySrc  = Join-Path $PSScriptRoot 'library'
+$RepoZipUrl  = 'https://github.com/cleandee/CleanTune/archive/refs/heads/main.zip'
+$LocalLibrary = if ($PSScriptRoot) { Join-Path $PSScriptRoot 'library' } else { $null }
 
 $DefaultGame    = 'WZ-BO7'
 $DefaultTuneVer = 'V1'
@@ -185,10 +192,29 @@ function Write-ProjectConfig([string]$Game = $DefaultGame, [string]$TuneVer = $D
     Write-Ok "config.txt written using $PreFile and $EqFile - previous one backed up"
 }
 
-function Copy-Library {
-    if (-not (Test-Path $LibrarySrc)) {
-        throw "library folder not found next to the script. Keep Install-CleanTune.ps1 and library\ together."
+function Get-LibrarySource {
+    # Running from a downloaded copy uses the library next to the script.
+    # Running through irm | iex downloads the latest library from GitHub.
+    if ($LocalLibrary -and (Test-Path $LocalLibrary)) {
+        Write-Info 'Using the library next to the script'
+        return $LocalLibrary
     }
+    New-Item -ItemType Directory -Force -Path $TempDir | Out-Null
+    $zip = Join-Path $TempDir 'CleanTune-repo.zip'
+    $dest = Join-Path $TempDir 'repo'
+    if (Test-Path $dest) { Remove-Item $dest -Recurse -Force }
+    Write-Info 'Downloading the latest tune library from GitHub...'
+    Invoke-WebRequest -Uri $RepoZipUrl -OutFile $zip -UseBasicParsing
+    Expand-Archive $zip -DestinationPath $dest -Force
+    $lib = Get-ChildItem $dest -Directory | ForEach-Object { Join-Path $_.FullName 'library' } |
+           Where-Object { Test-Path $_ } | Select-Object -First 1
+    if (-not $lib) { throw 'The download did not contain a library folder.' }
+    Write-Ok 'Library downloaded'
+    return $lib
+}
+
+function Copy-Library {
+    $LibrarySrc = Get-LibrarySource
     New-Item -ItemType Directory -Force -Path $ProjectDir | Out-Null
     if (Test-Path $LibraryDest) {
         $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
@@ -374,18 +400,19 @@ function Invoke-Remove {
 # ---------------------------------------------------------------------------
 if ($PSVersionTable.PSEdition -ne 'Desktop') {
     Write-Host 'Run this in Windows PowerShell 5.1, not PowerShell 7.' -ForegroundColor Red
-    exit 1
+    return
 }
 if (-not [Environment]::Is64BitOperatingSystem) {
     Write-Host 'Only 64-bit Windows is supported.' -ForegroundColor Red
-    exit 1
+    return
 }
 if (-not (Test-Admin)) {
     Write-Host 'Right-click Windows PowerShell and choose Run as administrator, then try again.' -ForegroundColor Red
-    exit 1
+    return
 }
 
-while ($true) {
+$quit = $false
+while (-not $quit) {
     Clear-Host
     Write-Host ''
     Write-Host "   $ProjectName  $Version" -ForegroundColor Cyan
@@ -404,11 +431,13 @@ while ($true) {
             '2' { Copy-Library }
             '3' { Invoke-SwitchVariation }
             '4' { Invoke-Remove }
-            'Q' { exit 0 }
+            'Q' { $quit = $true }
             default { }
         }
     } catch {
         Write-Host "`n    ERROR: $($_.Exception.Message)" -ForegroundColor Red
     }
-    Pause-Key
+    if (-not $quit) { Pause-Key }
+}
+
 }
