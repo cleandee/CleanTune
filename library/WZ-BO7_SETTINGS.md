@@ -4,8 +4,8 @@ Apply these before you play. If any of them are wrong the game can bypass the ch
 
 ## Windows
 
-- Playback device **CABLE Input** set to **7.1 Surround** under Configure
-- CABLE Input and CABLE Output both set to **24 bit, 48000 Hz** under Properties then Advanced
+- Playback device **CABLE Input** set to **7.1 Surround**. The installer does this for you, and option 5 redoes it if Windows ever resets it
+- CABLE Input and CABLE Output both at **24 bit, 48000 Hz**, also set by the installer
 - CABLE Output has **Listen to this device** ticked, playing back through your headphones
 - Spatial sound turned **off** on CABLE Input and on your headphones
 - Your headphones should NOT be ticked in the Equalizer APO Configurator. Only CABLE Input should be
@@ -44,7 +44,7 @@ Control loudness with Windows volume, the boost file or your headset, not the in
 
 - **No sound at all**: check Listen to this device is ticked on CABLE Output and pointed at your headphones
 - **Sound but no effect**: Equalizer APO is not installed on CABLE Input. Run the Configurator again
-- **Only stereo, no surround**: CABLE Input is not set to 7.1, or Speaker Output in game is not Windows Default
+- **Only stereo, no surround**: CABLE Input is not 7.1, so run option 5, or Speaker Output in game is not Windows Default
 - **Crackling**: sample rates do not match. Set everything to 48000 Hz
 - **Own gun still too loud**: make sure ReaPlugs is installed in Program Files then VSTPlugins then ReaPlugs, and that the PRE HESUVI line points at the nogun file
 - **Too quiet**: raise the value in `CleanTune\boost.txt` by 2 dB at a time

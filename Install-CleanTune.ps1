@@ -44,6 +44,12 @@ $Downloads = @{
         Page = 'https://sourceforge.net/projects/hesuvi/files/'
         File = 'HeSuVi_Setup.exe'
     }
+    SoundVolumeView = @{
+        Name = 'SoundVolumeView by NirSoft'
+        Url  = 'https://www.nirsoft.net/utils/soundvolumeview-x64.zip'
+        Page = 'https://www.nirsoft.net/utils/sound_volume_view.html'
+        File = 'soundvolumeview-x64.zip'
+    }
     ReaPlugs = @{
         Name = 'ReaPlugs'
         Url  = 'https://www.reaper.fm/reaplugs/reaplugs236_x64-install.exe'
@@ -67,6 +73,8 @@ $DefaultTuneVer = 'V1'
 $DefaultPreFile = 'WZ-BO7_V1_pre_nogun.txt'
 $DefaultEqFile  = '7Hz_G1.txt'      # falls back to Flat_EQ.txt if missing
 $ReaPlugsDir    = Join-Path $env:ProgramFiles 'VSTPlugins\ReaPlugs'
+$ToolsDir       = Join-Path $ProjectDir 'tools'
+$Mask71         = 0x63F   # FL FR FC LFE BL BR SL SR
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -295,6 +303,58 @@ function Install-HeSuVi {
     else { Write-Warn2 'HeSuVi files not found. Run the HeSuVi installer by hand, then re-run [1].' }
 }
 
+function Get-CableSpeakerMask {
+    # Reads the speaker layout Windows has stored for CABLE Input
+    $cable = Get-CableRenderDevice
+    if (-not $cable) { return $null }
+    $props = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render\$($cable.Guid)\Properties"
+    $v = (Get-ItemProperty $props -ErrorAction SilentlyContinue).'{1da5d803-d492-4edd-8c23-e0c0ffee7f0e},3'
+    if ($null -eq $v) { return $null }
+    return [int]$v
+}
+
+function Get-SoundVolumeView {
+    $exe = Join-Path $ToolsDir 'SoundVolumeView.exe'
+    if (Test-Path $exe) { return $exe }
+    $zip = Get-Tool $Downloads.SoundVolumeView
+    New-Item -ItemType Directory -Force -Path $ToolsDir | Out-Null
+    Expand-Archive $zip -DestinationPath $ToolsDir -Force
+    if (-not (Test-Path $exe)) { throw 'SoundVolumeView.exe not found in the download.' }
+    return $exe
+}
+
+function Set-Cable71 {
+    Write-Step 'Setting CABLE Input to 7.1 surround'
+    $cable = Get-CableRenderDevice
+    if (-not $cable) {
+        Write-Warn2 'CABLE Input not found. Restart your PC, then run option 5 from the menu.'
+        return
+    }
+    if ((Get-CableSpeakerMask) -eq $Mask71) { Write-Ok 'Already 7.1'; return }
+
+    $svv = Get-SoundVolumeView
+    $renderId  = "{0.0.0.00000000}.$($cable.Guid)"
+    $captureId = 'VB-Audio Virtual Cable\Device\CABLE Output\Capture'
+    $mask = '0x{0:X}' -f $Mask71
+
+    Start-Process $svv -ArgumentList '/SetSpeakersConfig', "`"$renderId`"", $mask, $mask, $mask -Wait
+    Start-Process $svv -ArgumentList '/SetDefaultFormat', "`"$renderId`"", '24', '48000', '8' -Wait
+    Start-Process $svv -ArgumentList '/SetDefaultFormat', "`"$captureId`"", '24', '48000' -Wait
+    Start-Sleep -Seconds 2
+
+    if ((Get-CableSpeakerMask) -eq $Mask71) {
+        Write-Ok 'CABLE Input is now 7.1 surround at 24 bit, 48000 Hz'
+        return
+    }
+
+    Write-Warn2 'Windows did not take the 7.1 setting automatically. Do it by hand:'
+    Write-Info  'Playback tab > CABLE Input > Configure > 7.1 Surround > Next until Finish'
+    Start-Process 'control.exe' -ArgumentList 'mmsys.cpl,,0'
+    Pause-Key 'Press Enter once you have done it'
+    if ((Get-CableSpeakerMask) -eq $Mask71) { Write-Ok 'CABLE Input is 7.1' }
+    else { Write-Warn2 'Still not 7.1. Surround will not work until it is.' }
+}
+
 function Install-ReaPlugs {
     Write-Step '4/7  ReaPlugs compressor for the No Gun tune'
     if (Test-Path (Join-Path $ReaPlugsDir 'reaxcomp-standalone.dll')) { Write-Ok 'Already installed - skipping'; return }
@@ -335,14 +395,16 @@ function Show-ManualSteps {
     Write-Host ''
     Write-Host '  ===================== MANUAL STEPS =====================' -ForegroundColor Yellow
     Write-Info ''
-    Write-Info 'A. Set CABLE Input to 7.1'
-    Write-Info '   Playback tab > CABLE Input > Configure > 7.1 Surround > Next until Finish'
-    Write-Info '   Then Properties > Advanced > 24 bit, 48000 Hz'
+    $m = Get-CableSpeakerMask
+    if ($m -eq $Mask71) { Write-Info 'A. CABLE Input is 7.1 - nothing to do' }
+    else {
+        Write-Info 'A. CABLE Input is NOT 7.1 yet. Run option 5, or set it by hand:'
+        Write-Info '   Playback tab > CABLE Input > Configure > 7.1 Surround > Next until Finish'
+    }
     Write-Info ''
     Write-Info 'B. Send the cable to your headphones'
     Write-Info '   Recording tab > CABLE Output > Properties > Listen'
     Write-Info '   Tick "Listen to this device" and pick your headphones'
-    Write-Info '   Advanced tab > 24 bit, 48000 Hz'
     Write-Info ''
     Write-Info 'C. Open "HeSuVi - CleanTune Atmos" in the CleanTune folder to load the surround preset'
     Write-Info ''
@@ -354,6 +416,7 @@ function Show-ManualSteps {
 
 function Invoke-Install {
     Install-VBCable
+    Set-Cable71
     Install-EAPO
     Install-HeSuVi
     Install-ReaPlugs
@@ -422,6 +485,7 @@ while (-not $quit) {
     Write-Host '   [2] Refresh tune library'
     Write-Host '   [3] Switch tune variation'
     Write-Host '   [4] Remove CleanTune and restore original config'
+    Write-Host '   [5] Set the cable to 7.1 surround'
     Write-Host '   [Q] Quit'
     Write-Host ''
     $choice = Read-Host '   Choose'
@@ -431,6 +495,7 @@ while (-not $quit) {
             '2' { Copy-Library }
             '3' { Invoke-SwitchVariation }
             '4' { Invoke-Remove }
+            '5' { Set-Cable71 }
             'Q' { $quit = $true }
             default { }
         }

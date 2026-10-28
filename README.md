@@ -5,7 +5,7 @@ Game audio tuning for Call of Duty Warzone and Black Ops 7 on Windows. It routes
 ## How the audio flows
 
 ```
-Game  ->  CABLE Input  ->  Equalizer APO chain  ->  CABLE Output  ->  Listen  ->  Headphones
+Game  ->  CABLE Input 7.1  ->  Equalizer APO chain  ->  CABLE Output  ->  Listen  ->  Headphones
                            pre > HeSuVi > EQ > post > boost
 ```
 
@@ -47,6 +47,7 @@ The downloaded copy uses the library next to the script. The one-line install al
 | 2 Refresh tune library | Copies the library again, backing up the old one first |
 | 3 Switch tune variation | Swap between No Gun, Competitive and Clean without editing files. Your EQ choice is kept |
 | 4 Remove CleanTune | Restores your original config.txt and deletes the CleanTune folder |
+| 5 Set the cable to 7.1 | Sets CABLE Input to 7.1 surround at 24 bit, 48000 Hz and checks it worked |
 
 Every time config.txt is rewritten the old one is backed up as `config.backup-date.txt` in the Equalizer APO config folder.
 
@@ -87,5 +88,6 @@ CleanTune downloads these tools from their official sources at install time and 
 - HeSuVi, GPL-2.0
 - VB-CABLE by VB-Audio, donationware
 - ReaPlugs by Cockos, freeware
+- SoundVolumeView by NirSoft, freeware, used to set the cable to 7.1
 
 The idea of a multiband compressor on the front channels came from studying ArtTuneDB by ArtIsWar, licensed CC BY-NC-SA 4.0. CleanTune uses its own settings, and is for personal non-commercial use in the same spirit.
