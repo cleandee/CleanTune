@@ -1,7 +1,0 @@
-CleanTune - Warzone / BO7 - V1
-
-WZ-BO7_V1_pre_nogun.txt  No Gun       Default. Your own gun pushed right down, footsteps lifted.
-WZ-BO7_V1_pre.txt        Competitive  Strong footstep lift, explosions tamed, gun left alone.
-WZ-BO7_V1_pre_clean.txt  Clean        Lighter and more natural for long sessions.
-
-Switch with option 3 in the installer, or edit the PRE HESUVI line in config.txt.

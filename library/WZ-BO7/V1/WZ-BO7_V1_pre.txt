@@ -1,36 +1,54 @@
-# CleanTune - Warzone / BO7 - V1 Competitive (default)
-# Pre-HeSuVi chain. Runs on the raw 7.1 game mix before virtual surround.
-# Goal: lift footsteps, tame explosions and low rumble, keep headroom.
+# CleanTune - Warzone / BO7 - V1 Low Gun
+# The only CleanTune preset. Pre-HeSuVi chain, 7.1.
+# Built to push your own gunfire right down.
+#
+# How it works: your own gun is the loudest thing in the mix and sits in the
+# front and centre channels. Enemies behind and beside you come through the
+# rear and side channels. So this:
+#   1. Squashes loud hits on the front channels with a multiband compressor.
+#      Quiet sounds like footsteps stay under the threshold and pass through.
+#   2. Drops the centre channel hard, where most of your own weapon lives.
+#   3. Halves the sub channel to kill the gun and explosion thump.
+#   4. Lifts footsteps on the rear and side channels.
+#
+# Needs ReaPlugs installed - the installer does this.
+# Compressor layout idea learned from ArtTuneDB by ArtIsWar, CC BY-NC-SA 4.0.
+# Band values are CleanTune's own:
+#   <110 Hz    -24 dB  6:1     thump
+#   110-500    -30 dB  8:1     body
+#   500-1.5k   -36 dB  10:1    bark
+#   1.5k-2.5k  -36 dB  10:1    crack
+#   2.5k+      -30 dB  8:1     snap and tail
 # Channels: L R C LFE RL RR SL SR
 
-# Headroom so the boosts below never clip
 Preamp: -7 dB
 
-# ---- All channels ----
+# ---- Front channels: squash your own gun ----
+Channel: L R
+VSTPlugin: Library "C:\Program Files\VSTPlugins\ReaPlugs\reaxcomp-standalone.dll" ChunkData "OAAAAAYAAAAAAAAAAIBbQAAAAAAAAPA/+qn4wwonsD8AAAAAAAAYQAAAAAAAABBABQAAAHgAAAAFAAAAEAAAAAAAAAAAQH9AAAAAAAAA8D9yOqBO3DCgPwAAAAAAACBAAAAAAAAAEEADAAAAeAAAAAUAAAAQAAAAAAAAAABwl0AAAAAAAADwP8TCK9GzOpA/AAAAAAAAJEAAAAAAAAAQQAIAAABkAAAABQAAABAAAAAAAAAAAIijQAAAAAAAAPA/xMIr0bM6kD8AAAAAAAAkQAAAAAAAABBAAgAAAGQAAAAFAAAAEAAAAAAAAACAzNJAAAAAAAAA8D9yOqBO3DCgPwAAAAAAACBAAAAAAAAAEEABAAAAWgAAAAUAAAAQAAAAAAAAAABw10AAAAAAAADwPwAAAAAAAPA/AAAAAAAA8D8AAAAAAAAAAA8AAACWAAAABQAAABgAAAABAAAAAQAAACF9WpXM/e8/AAAAAA=="
+Preamp: -4 dB
+
+# ---- Centre channel: where your own weapon sits ----
+Channel: C
+Preamp: -12 dB
+
+# ---- Sub channel: kill the thump ----
+Channel: LFE
+Preamp: -9 dB
+
+# ---- All channels: footstep EQ ----
 Channel: all
-# Remove sub rumble headphones cannot reproduce cleanly
 Filter: ON HP Fc 28 Hz Q 0.707
-# Tame explosions, vehicles and killstreak bass
 Filter: ON LSC Fc 120 Hz Gain -4 dB Q 0.7
-# Clear the low-mid mud that masks movement
 Filter: ON PK Fc 300 Hz Gain -2.5 dB Q 1.0
-# Footstep body - boots on hard floors
 Filter: ON PK Fc 1100 Hz Gain 1.5 dB Q 1.2
-# Footstep presence and gear rustle - the main lift
 Filter: ON PK Fc 3200 Hz Gain 4 dB Q 1.1
-# Pull back harshness from gunfire crack
-Filter: ON PK Fc 6500 Hz Gain -2 dB Q 2.0
-# Slight top-end trim
+Filter: ON PK Fc 6500 Hz Gain -3 dB Q 2.0
 Filter: ON HSC Fc 10000 Hz Gain -1 dB Q 0.7
 
-# ---- Sub channel ----
-# Halve the LFE channel so explosions do not swamp the mix
-Channel: LFE
-Preamp: -6 dB
-
-# ---- Rear and side channels ----
-# Small extra lift so enemies behind you stand out
+# ---- Rear and side channels: enemies around you ----
 Channel: RL RR SL SR
-Filter: ON PK Fc 2800 Hz Gain 1.5 dB Q 1.0
+Preamp: 1 dB
+Filter: ON PK Fc 2800 Hz Gain 2 dB Q 1.0
 
 Channel: all

@@ -70,7 +70,7 @@ $LocalLibrary = if ($PSScriptRoot) { Join-Path $PSScriptRoot 'library' } else { 
 
 $DefaultGame    = 'WZ-BO7'
 $DefaultTuneVer = 'V1'
-$DefaultPreFile = 'WZ-BO7_V1_pre_nogun.txt'
+$DefaultPreFile = 'WZ-BO7_V1_pre.txt'
 $DefaultEqFile  = '7Hz_G1.txt'      # falls back to Flat_EQ.txt if missing
 $ReaPlugsDir    = Join-Path $env:ProgramFiles 'VSTPlugins\ReaPlugs'
 $ToolsDir       = Join-Path $ProjectDir 'tools'
@@ -253,7 +253,7 @@ function New-Shortcut([string]$Path, [string]$Target, [string]$Arguments = '') {
 # Install steps
 # ---------------------------------------------------------------------------
 function Install-VBCable {
-    Write-Step '1/7  VB-CABLE virtual audio cable'
+    Write-Step '1/8  VB-CABLE virtual audio cable'
     if (Get-CableRenderDevice) { Write-Ok 'Already installed - skipping'; return }
 
     $zip = Get-Tool $Downloads.VBCable
@@ -271,7 +271,7 @@ function Install-VBCable {
 }
 
 function Install-EAPO {
-    Write-Step '2/7  Equalizer APO'
+    Write-Step '3/8  Equalizer APO'
     if (Test-Path (Join-Path $EapoDir 'Configurator.exe')) {
         Write-Ok 'Already installed - skipping download'
     } else {
@@ -293,7 +293,7 @@ function Install-EAPO {
 }
 
 function Install-HeSuVi {
-    Write-Step '3/7  HeSuVi virtual surround'
+    Write-Step '4/8  HeSuVi virtual surround'
     if (Test-Path (Join-Path $EapoConfig 'HeSuVi\hesuvi.txt')) { Write-Ok 'Already installed - skipping'; return }
 
     $exe = Get-Tool $Downloads.HeSuVi
@@ -324,10 +324,10 @@ function Get-SoundVolumeView {
 }
 
 function Set-Cable71 {
-    Write-Step 'Setting CABLE Input to 7.1 surround'
+    Write-Step '2/8  Setting CABLE Input to 7.1 surround'
     $cable = Get-CableRenderDevice
     if (-not $cable) {
-        Write-Warn2 'CABLE Input not found. Restart your PC, then run option 5 from the menu.'
+        Write-Warn2 'CABLE Input not found. Restart your PC, then run the installer again.'
         return
     }
     if ((Get-CableSpeakerMask) -eq $Mask71) { Write-Ok 'Already 7.1'; return }
@@ -356,27 +356,27 @@ function Set-Cable71 {
 }
 
 function Install-ReaPlugs {
-    Write-Step '4/7  ReaPlugs compressor for the No Gun tune'
+    Write-Step '5/8  ReaPlugs compressor for the Low Gun preset'
     if (Test-Path (Join-Path $ReaPlugsDir 'reaxcomp-standalone.dll')) { Write-Ok 'Already installed - skipping'; return }
     $exe = Get-Tool $Downloads.ReaPlugs
     Write-Info 'Installing silently...'
     Start-Process $exe -ArgumentList '/S', "/D=$ReaPlugsDir" -Wait
     if (Test-Path (Join-Path $ReaPlugsDir 'reaxcomp-standalone.dll')) { Write-Ok 'ReaPlugs installed' }
-    else { Write-Warn2 "ReaPlugs not found in $ReaPlugsDir. The No Gun tune needs it there." }
+    else { Write-Warn2 "ReaPlugs not found in $ReaPlugsDir. The Low Gun preset needs it there." }
 }
 
 function Install-Library {
-    Write-Step '5/7  Tune library'
+    Write-Step '6/8  Tune library'
     Copy-Library
 }
 
 function Install-Config {
-    Write-Step '6/7  Equalizer APO config.txt'
+    Write-Step '7/8  Equalizer APO config.txt'
     Write-ProjectConfig
 }
 
 function Install-Shortcuts {
-    Write-Step '7/7  Shortcuts'
+    Write-Step '8/8  Shortcuts'
     $editor = Join-Path $EapoDir 'Editor.exe'
     if (Test-Path $editor) { New-Shortcut (Join-Path $ProjectDir 'E-APO Configuration Editor.lnk') $editor }
     $hesuvi = Join-Path $EapoConfig 'HeSuVi\HeSuVi.exe'
@@ -398,7 +398,7 @@ function Show-ManualSteps {
     $m = Get-CableSpeakerMask
     if ($m -eq $Mask71) { Write-Info 'A. CABLE Input is 7.1 - nothing to do' }
     else {
-        Write-Info 'A. CABLE Input is NOT 7.1 yet. Run option 5, or set it by hand:'
+        Write-Info 'A. CABLE Input is NOT 7.1 yet. Set it by hand:'
         Write-Info '   Playback tab > CABLE Input > Configure > 7.1 Surround > Next until Finish'
     }
     Write-Info ''
@@ -430,20 +430,6 @@ function Invoke-Install {
 # ---------------------------------------------------------------------------
 # Other menu actions
 # ---------------------------------------------------------------------------
-function Invoke-SwitchVariation {
-    $dir = Join-Path $LibraryDest "$DefaultGame\$DefaultTuneVer"
-    $pres = Get-ChildItem $dir -Filter '*_pre*.txt' -ErrorAction SilentlyContinue
-    if (-not $pres) { Write-Warn2 'No tunes found. Run [1] first.'; return }
-    Write-Host ''
-    for ($i = 0; $i -lt $pres.Count; $i++) { Write-Host "    [$($i+1)] $($pres[$i].Name)" }
-    $pick = Read-Host '    Pick a variation'
-    $n = 0
-    if ([int]::TryParse($pick, [ref]$n) -and $n -ge 1 -and $n -le $pres.Count) {
-        Write-ProjectConfig -PreFile $pres[$n-1].Name
-        Write-Ok "Now using $($pres[$n-1].Name). Equalizer APO reloads it live."
-    } else { Write-Warn2 'Cancelled' }
-}
-
 function Invoke-Remove {
     Write-Step "Removing $ProjectName"
     $backups = Get-ChildItem $EapoConfig -Filter 'config.backup-*.txt' -ErrorAction SilentlyContinue | Sort-Object Name
@@ -479,13 +465,11 @@ while (-not $quit) {
     Clear-Host
     Write-Host ''
     Write-Host "   $ProjectName  $Version" -ForegroundColor Cyan
-    Write-Host '   Warzone / Black Ops 7 audio tuning'
+    Write-Host '   Warzone / Black Ops 7 audio tuning - Low Gun'
     Write-Host ''
     Write-Host '   [1] Install'
     Write-Host '   [2] Refresh tune library'
-    Write-Host '   [3] Switch tune variation'
-    Write-Host '   [4] Remove CleanTune and restore original config'
-    Write-Host '   [5] Set the cable to 7.1 surround'
+    Write-Host '   [3] Remove CleanTune and restore original config'
     Write-Host '   [Q] Quit'
     Write-Host ''
     $choice = Read-Host '   Choose'
@@ -493,9 +477,7 @@ while (-not $quit) {
         switch ($choice.ToUpper()) {
             '1' { Invoke-Install }
             '2' { Copy-Library }
-            '3' { Invoke-SwitchVariation }
-            '4' { Invoke-Remove }
-            '5' { Set-Cable71 }
+            '3' { Invoke-Remove }
             'Q' { $quit = $true }
             default { }
         }

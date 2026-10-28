@@ -43,11 +43,9 @@ The downloaded copy uses the library next to the script. The one-line install al
 
 | Option | What it does |
 | --- | --- |
-| 1 Install | Installs VB-CABLE, Equalizer APO, HeSuVi and ReaPlugs, copies the library, writes config.txt |
+| 1 Install | Installs VB-CABLE and sets it to 7.1 surround, installs Equalizer APO, HeSuVi and ReaPlugs, copies the library, writes config.txt |
 | 2 Refresh tune library | Copies the library again, backing up the old one first |
-| 3 Switch tune variation | Swap between No Gun, Competitive and Clean without editing files. Your EQ choice is kept |
-| 4 Remove CleanTune | Restores your original config.txt and deletes the CleanTune folder |
-| 5 Set the cable to 7.1 | Sets CABLE Input to 7.1 surround at 24 bit, 48000 Hz and checks it worked |
+| 3 Remove CleanTune | Restores your original config.txt and deletes the CleanTune folder |
 
 Every time config.txt is rewritten the old one is backed up as `config.backup-date.txt` in the Equalizer APO config folder.
 
@@ -58,10 +56,7 @@ library/
   WZ-BO7_SETTINGS.md          Windows and in-game settings
   WZ-BO7/
     V1/
-      Choose a Tune.txt       What each variation does
-      WZ-BO7_V1_pre_nogun.txt No Gun pre chain, the default
-      WZ-BO7_V1_pre.txt       Competitive pre chain, 7.1, before HeSuVi
-      WZ-BO7_V1_pre_clean.txt Clean pre chain
+      WZ-BO7_V1_pre.txt       Low Gun preset, 7.1, before HeSuVi
       WZ-BO7_V1_post.txt      Stereo chain after HeSuVi
       WZ-BO7_Target_V1.txt    Target curve for squig.link
       eq/7Hz_G1.txt           Your 7Hz G1 EQ, used by default
